@@ -1,4 +1,18 @@
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: housefinder-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/housefinder
+    depends_on:
+      - db
+
   frontend:
     build:
       context: ./frontend
@@ -11,13 +25,18 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-      
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: housefinder-backend
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: housefinder-db
     ports:
-      - "8000:8000"
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=housefinder
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
-      - ./backend:/app
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
