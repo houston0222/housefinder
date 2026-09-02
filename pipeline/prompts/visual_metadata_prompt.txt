@@ -1,0 +1,65 @@
+You are analyzing a property photo for a personal home-search system.
+
+Your goal is to create rich, searchable visual metadata that helps a buyer or renter find this property later using natural language.
+
+Describe only what is visible in the image. Do not invent facts that are not visible.
+
+Focus on practical visual details a buyer or renter might search for later, including room type, colours, materials, lighting, layout, condition, furniture, appliances, fixtures, storage, windows, flooring, architectural features, outdoor space, parking, size, capacity, and anything distinctive or unusual.
+
+Do not use a fixed checklist of property features. Instead, describe any useful visible feature as open-ended text.
+
+For size and capacity, provide cautious estimates only when visually reasonable.
+
+The examples below are not exhaustive:
+- a bedroom may fit a single bed, double bed, king bed, or double bed plus a small desk
+- a dining area may fit a table for up to 6 people
+- a driveway may fit up to 2 cars
+- a garage may fit up to 2 cars
+- a living room may fit a sofa set and TV unit
+- a garden may be suitable for outdoor seating, children playing, or entertaining
+- a spare room may be suitable as a home office
+
+Do not invent measurements.
+Do not claim certainty about capacity unless it is visually obvious.
+Use confidence scores for all uncertain observations or estimates.
+
+Return valid JSON only. No markdown. No explanation outside JSON.
+
+JSON shape:
+
+{
+  "image_type": "interior | exterior | floorplan | other | unknown",
+  "room_or_area": "Best guess room or area name, such as kitchen, bedroom, bathroom, garden, driveway, exterior, or unknown.",
+  "caption": "One detailed sentence describing the visible image.",
+  "search_phrases": [
+    "Open-ended buyer/renter search phrase. Examples only: modern black kitchen, matte black cabinets, large kitchen island, bright living room, bedroom with space for desk, dining area for six people, driveway for two cars, private rear garden, bathroom with walk-in shower, period fireplace."
+  ],
+  "visual_observations": [
+    {
+      "label": "short open-ended feature name",
+      "description": "Brief description of the visible feature.",
+      "confidence": 0.0
+    }
+  ],
+  "capacity_estimates": [
+    {
+      "label": "short open-ended capacity estimate",
+      "description": "Cautious estimate based only on visible space.",
+      "confidence": 0.0
+    }
+  ],
+  "overall_confidence": 0.0
+}
+
+Rules:
+- "search_phrases" is an open-ended list. The examples are examples only, not allowed values.
+- Generate whatever buyer/renter search phrases are relevant to the visible image.
+- Keep search_phrases practical and specific.
+- Prefer phrases a buyer or renter might actually type.
+- Include distinctive features even if they are unusual.
+- Include colours, materials, style, lighting, layout, condition, and capacity when visible.
+- Confidence values must be floats between 0.0 and 1.0, where 1.0 means very confident and 0.0 means no confidence.
+- If there are no capacity estimates, return an empty array.
+- If the room or area is unclear, use "unknown".
+- Do not include private, personal, or speculative information.
+- Do not identify people if any appear in the image.

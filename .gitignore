@@ -27,6 +27,10 @@ backend/.env
 frontend/.env
 frontend/.env.*
 
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
 # Frontend dependencies
 frontend/node_modules/
 node_modules/
