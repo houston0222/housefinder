@@ -134,7 +134,7 @@ def get_text_paths() -> list[tuple[str, Path]]:
 
 
 def generate_text_embeddings(
-    max_items: int | None = MAX_ITEMS,
+    max_items: int | None = None,
     sleep_seconds: int = SLEEP_SECONDS,
 ) -> None:
     load_dotenv("/app/.env")
@@ -148,7 +148,12 @@ def generate_text_embeddings(
     failed_count = 0
 
     print(f"Found text files: {len(text_paths)}")
-    print(f"Max new embeddings to create: {max_items}")
+
+    if max_items is None:
+        print("Max new embeddings to create: no limit")
+    else:
+        print(f"Max new embeddings to create: {max_items}")
+
     print()
 
     for level, text_path in text_paths:
@@ -184,7 +189,4 @@ def generate_text_embeddings(
 
 
 if __name__ == "__main__":
-    generate_text_embeddings(
-        max_items=None,
-        sleep_seconds=0,
-    )
+    generate_text_embeddings()
