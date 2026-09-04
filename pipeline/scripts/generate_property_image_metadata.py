@@ -103,7 +103,7 @@ def save_analysis(output_path: Path, analysis: dict[str, Any]) -> None:
     )
 
 
-def analyze_images(
+def generate_property_image_metadata(
     max_images: int = MAX_IMAGES,
     sleep_seconds: int = SLEEP_SECONDS,
 ) -> None:
@@ -165,7 +165,7 @@ def analyze_images(
 
 
 if __name__ == "__main__":
-    analyze_images(
+    generate_property_image_metadata(
         max_images=6000,
         sleep_seconds=0,
     )
