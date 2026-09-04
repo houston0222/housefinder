@@ -116,7 +116,7 @@ def save_image_metadata(
 
 
 def generate_property_image_metadata(
-    max_images: int = MAX_IMAGES,
+    max_images: int | None = None,
     sleep_seconds: int = SLEEP_SECONDS,
 ) -> None:
     load_dotenv("/app/.env")
@@ -131,11 +131,16 @@ def generate_property_image_metadata(
     failed_count = 0
 
     print(f"Found normalized images: {len(image_paths)}")
-    print(f"Max new metadata files to generate: {max_images}")
+
+    if max_images is None:
+        print("Max new metadata files to generate: no limit")
+    else:
+        print(f"Max new metadata files to generate: {max_images}")
+
     print()
 
     for image_path in image_paths:
-        if generated_count >= max_images:
+        if max_images is not None and generated_count >= max_images:
             print(f"Reached max_images: {max_images}")
             break
 
@@ -181,7 +186,4 @@ def generate_property_image_metadata(
 
 
 if __name__ == "__main__":
-    generate_property_image_metadata(
-        max_images=6000,
-        sleep_seconds=0,
-    )
+    generate_property_image_metadata()
