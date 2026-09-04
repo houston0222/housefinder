@@ -24,7 +24,7 @@ def load_text(path: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
-def create_embedding(client: OpenAI, text: str) -> list[float]:
+def generate_text_embedding(client: OpenAI, text: str) -> list[float]:
     response = client.embeddings.create(
         model=MODEL,
         input=text,
@@ -59,7 +59,7 @@ def generate_property_embedding(
         print(f"Skipped empty property text: {text_path}")
         return False
 
-    embedding = create_embedding(client, text)
+    embedding = generate_text_embedding(client, text)
 
     save_json(
         output_path,
@@ -95,7 +95,7 @@ def generate_image_embedding(
         print(f"Skipped empty image text: {text_path}")
         return False
 
-    embedding = create_embedding(client, text)
+    embedding = generate_text_embedding(client, text)
 
     save_json(
         output_path,
@@ -133,7 +133,7 @@ def get_text_paths() -> list[tuple[str, Path]]:
     return paths
 
 
-def generate_embeddings(
+def generate_text_embeddings(
     max_items: int | None = MAX_ITEMS,
     sleep_seconds: int = SLEEP_SECONDS,
 ) -> None:
@@ -184,7 +184,7 @@ def generate_embeddings(
 
 
 if __name__ == "__main__":
-    generate_embeddings(
+    generate_text_embeddings(
         max_items=None,
         sleep_seconds=0,
     )
