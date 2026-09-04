@@ -12,4 +12,6 @@ The property and image text representations are then converted into vector embed
 
 Finally, the prepared property data, image metadata, embedding text, embeddings, and normalized image paths are imported into **PostgreSQL with pgvector**. Existing property and image records are updated, while new records are created, making the processed pipeline data available to the HouseFinder application.
 
+The pipeline is orchestrated by `run_pipeline.py`, which executes each processing stage in sequence while keeping the individual stages independently runnable and testable.
+
 **`raw_images/` → Image normalization → `normalized_images/` → GPT-4.1 mini visual analysis → `image_metadata/` → Embedding text construction → `embedding_text/` → `text-embedding-3-small` → `embeddings/` → PostgreSQL + pgvector**
