@@ -11,13 +11,15 @@ from openai import OpenAI
 
 PROMPT_PATH = Path("/app/pipeline/prompts/visual_metadata_prompt.txt")
 
-PROCESSED_IMAGES_DIR = Path("/app/data/processed_images")
-IMAGE_ANALYSIS_DIR = Path("/app/data/image_analysis")
+NORMALIZED_IMAGES_DIR = Path("/app/data/normalized_images")
+IMAGE_METADATA_DIR = Path("/app/data/image_metadata")
 
 MODEL = "gpt-4.1-mini"
 
 MAX_IMAGES = 20
 SLEEP_SECONDS = 1
+
+SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
 def encode_image_base64(image_path: Path) -> str:
@@ -31,41 +33,48 @@ def load_prompt() -> str:
     return PROMPT_PATH.read_text(encoding="utf-8")
 
 
-def get_image_paths(
-    processed_images_dir: Path = PROCESSED_IMAGES_DIR,
+def get_property_image_paths(
+    normalized_images_dir: Path = NORMALIZED_IMAGES_DIR,
 ) -> list[Path]:
-    if not processed_images_dir.exists():
-        raise FileNotFoundError(f"Processed images directory not found: {processed_images_dir}")
+    if not normalized_images_dir.exists():
+        raise FileNotFoundError(
+            f"Normalized images directory not found: {normalized_images_dir}"
+        )
 
     image_paths = []
 
     property_dirs = sorted(
-        path for path in processed_images_dir.iterdir()
+        path
+        for path in normalized_images_dir.iterdir()
         if path.is_dir()
     )
 
     for property_dir in property_dirs:
         property_image_paths = sorted(
-            path for path in property_dir.iterdir()
-            if path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+            path
+            for path in property_dir.iterdir()
+            if path.is_file()
+            and path.suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS
         )
 
         image_paths.extend(property_image_paths)
 
     if not image_paths:
-        raise FileNotFoundError(f"No processed images found in: {processed_images_dir}")
+        raise FileNotFoundError(
+            f"No normalized images found in: {normalized_images_dir}"
+        )
 
     return image_paths
 
 
-def get_output_path(image_path: Path) -> Path:
+def get_image_metadata_output_path(image_path: Path) -> Path:
     property_id = image_path.parent.name
     image_id = image_path.stem
 
-    return IMAGE_ANALYSIS_DIR / property_id / f"{image_id}.json"
+    return IMAGE_METADATA_DIR / property_id / f"{image_id}.json"
 
 
-def analyze_one_image(
+def generate_image_metadata(
     client: OpenAI,
     prompt: str,
     image_path: Path,
@@ -94,11 +103,14 @@ def analyze_one_image(
     return json.loads(response.output_text)
 
 
-def save_analysis(output_path: Path, analysis: dict[str, Any]) -> None:
+def save_image_metadata(
+    output_path: Path,
+    metadata: dict[str, Any],
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     output_path.write_text(
-        json.dumps(analysis, indent=2, ensure_ascii=False),
+        json.dumps(metadata, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
 
@@ -110,41 +122,45 @@ def generate_property_image_metadata(
     load_dotenv("/app/.env")
 
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    prompt = load_prompt()
-    image_paths = get_image_paths()
 
-    analyzed_count = 0
+    prompt = load_prompt()
+    image_paths = get_property_image_paths()
+
+    generated_count = 0
     skipped_count = 0
     failed_count = 0
 
-    print(f"Found processed images: {len(image_paths)}")
-    print(f"Max new images to analyze: {max_images}")
+    print(f"Found normalized images: {len(image_paths)}")
+    print(f"Max new metadata files to generate: {max_images}")
     print()
 
     for image_path in image_paths:
-        if analyzed_count >= max_images:
+        if generated_count >= max_images:
             print(f"Reached max_images: {max_images}")
             break
 
-        output_path = get_output_path(image_path)
+        output_path = get_image_metadata_output_path(image_path)
 
         if output_path.exists():
             skipped_count += 1
             print(f"Skipped existing: {output_path}")
             continue
 
-        print(f"Analyzing: {image_path}")
+        print(f"Generating metadata: {image_path}")
 
         try:
-            analysis = analyze_one_image(
+            metadata = generate_image_metadata(
                 client=client,
                 prompt=prompt,
                 image_path=image_path,
             )
 
-            save_analysis(output_path, analysis)
+            save_image_metadata(
+                output_path=output_path,
+                metadata=metadata,
+            )
 
-            analyzed_count += 1
+            generated_count += 1
 
             print(f"Saved: {output_path}")
             print()
@@ -159,7 +175,7 @@ def generate_property_image_metadata(
             print()
 
     print("Done.")
-    print(f"Analyzed: {analyzed_count}")
+    print(f"Generated: {generated_count}")
     print(f"Skipped existing: {skipped_count}")
     print(f"Failed: {failed_count}")
 
