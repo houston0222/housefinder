@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.models.property import Base, Property
 from app.models.property_image import PropertyImage
 
+
 DATA_DIR = Path("/app/data")
 
 PARSED_DIR = DATA_DIR / "parsed"
@@ -18,10 +19,10 @@ PARSED_DIR = DATA_DIR / "parsed"
 PROPERTY_TEXT_DIR = DATA_DIR / "embedding_text/properties"
 PROPERTY_EMBEDDINGS_DIR = DATA_DIR / "embeddings/properties"
 
-IMAGE_ANALYSIS_DIR = DATA_DIR / "image_analysis"
+IMAGE_METADATA_DIR = DATA_DIR / "image_metadata"
 IMAGE_TEXT_DIR = DATA_DIR / "embedding_text/images"
 IMAGE_EMBEDDINGS_DIR = DATA_DIR / "embeddings/images"
-PROCESSED_IMAGES_DIR = DATA_DIR / "processed_images"
+NORMALIZED_IMAGES_DIR = DATA_DIR / "normalized_images"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -47,7 +48,9 @@ def parse_price_amount(price_text: str | None) -> int | None:
     return int(digits)
 
 
-def load_embedding_if_exists(path: Path) -> tuple[str | None, list[float] | None]:
+def load_embedding_if_exists(
+    path: Path,
+) -> tuple[str | None, list[float] | None]:
     if not path.exists():
         return None, None
 
@@ -111,19 +114,19 @@ def import_property_images(
     property_id: str,
     image_urls: list[str],
 ) -> tuple[int, int]:
-    property_image_analysis_dir = IMAGE_ANALYSIS_DIR / property_id
+    property_image_metadata_dir = IMAGE_METADATA_DIR / property_id
 
-    if not property_image_analysis_dir.exists():
+    if not property_image_metadata_dir.exists():
         return 0, 0
 
-    image_analysis_paths = sorted(property_image_analysis_dir.glob("*.json"))
+    image_metadata_paths = sorted(property_image_metadata_dir.glob("*.json"))
 
     created_count = 0
     updated_count = 0
 
-    for index, image_analysis_path in enumerate(image_analysis_paths):
-        image_id = image_analysis_path.stem
-        image_json = load_json(image_analysis_path)
+    for index, image_metadata_path in enumerate(image_metadata_paths):
+        image_id = image_metadata_path.stem
+        image_metadata = load_json(image_metadata_path)
 
         image_row, was_created = get_or_create_property_image(
             session=session,
@@ -139,24 +142,28 @@ def import_property_images(
             IMAGE_EMBEDDINGS_DIR / property_id / f"{image_id}.json"
         )
 
-        processed_image_path = PROCESSED_IMAGES_DIR / property_id / f"{image_id}.jpg"
+        normalized_image_path = (
+            NORMALIZED_IMAGES_DIR / property_id / f"{image_id}.jpg"
+        )
 
-        image_row.source_image_url = image_urls[index] if index < len(image_urls) else None
+        image_row.source_image_url = (
+            image_urls[index] if index < len(image_urls) else None
+        )
         image_row.raw_image_path = None
         image_row.processed_image_path = (
-            str(processed_image_path)
-            if processed_image_path.exists()
+            str(normalized_image_path)
+            if normalized_image_path.exists()
             else None
         )
 
-        image_row.image_type = image_json.get("image_type")
-        image_row.room_or_area = image_json.get("room_or_area")
-        image_row.caption = image_json.get("caption")
+        image_row.image_type = image_metadata.get("image_type")
+        image_row.room_or_area = image_metadata.get("room_or_area")
+        image_row.caption = image_metadata.get("caption")
 
-        image_row.search_phrases = image_json.get("search_phrases")
-        image_row.visual_observations = image_json.get("visual_observations")
-        image_row.capacity_estimates = image_json.get("capacity_estimates")
-        image_row.overall_confidence = image_json.get("overall_confidence")
+        image_row.search_phrases = image_metadata.get("search_phrases")
+        image_row.visual_observations = image_metadata.get("visual_observations")
+        image_row.capacity_estimates = image_metadata.get("capacity_estimates")
+        image_row.overall_confidence = image_metadata.get("overall_confidence")
 
         image_row.embedding_text = embedding_text
         image_row.embedding_model = embedding_model
@@ -170,7 +177,10 @@ def import_property_images(
     return created_count, updated_count
 
 
-def import_property(session: Session, parsed_path: Path) -> tuple[bool, bool, int, int]:
+def import_property(
+    session: Session,
+    parsed_path: Path,
+) -> tuple[bool, bool, int, int]:
     parsed_json = load_json(parsed_path)
 
     property_id = str(parsed_json.get("property_id", "")).strip()
@@ -179,9 +189,14 @@ def import_property(session: Session, parsed_path: Path) -> tuple[bool, bool, in
         print(f"Skipped missing property_id: {parsed_path}")
         return False, False, 0, 0
 
-    property_row, property_was_created = get_or_create_property(session, property_id)
+    property_row, property_was_created = get_or_create_property(
+        session,
+        property_id,
+    )
 
-    embedding_text = load_text_if_exists(PROPERTY_TEXT_DIR / f"{property_id}.txt")
+    embedding_text = load_text_if_exists(
+        PROPERTY_TEXT_DIR / f"{property_id}.txt"
+    )
 
     embedding_model, embedding = load_embedding_if_exists(
         PROPERTY_EMBEDDINGS_DIR / f"{property_id}.json"
@@ -234,7 +249,7 @@ def import_property(session: Session, parsed_path: Path) -> tuple[bool, bool, in
     return True, property_was_created, images_created, images_updated
 
 
-def import_to_db() -> None:
+def import_pipeline_data_to_db() -> None:
     database_url = get_database_url()
     engine = create_engine(database_url)
 
@@ -281,4 +296,4 @@ def import_to_db() -> None:
 
 
 if __name__ == "__main__":
-    import_to_db()
+    import_pipeline_data_to_db()
