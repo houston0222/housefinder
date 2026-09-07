@@ -12,7 +12,7 @@ from app.models.property import Base, Property
 from app.models.property_image import PropertyImage
 
 
-DATA_DIR = Path("/app/data")
+DATA_DIR = Path("/property_data")
 
 PARSED_DIR = DATA_DIR / "parsed"
 

@@ -9,10 +9,10 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 
-PROMPT_PATH = Path("/app/pipeline/prompts/visual_metadata_prompt.txt")
+PROMPT_PATH = Path("/app/prompts/visual_metadata_prompt.txt")
 
-NORMALIZED_IMAGES_DIR = Path("/app/data/normalized_images")
-IMAGE_METADATA_DIR = Path("/app/data/image_metadata")
+NORMALIZED_IMAGES_DIR = Path("/property_data/normalized_images")
+IMAGE_METADATA_DIR = Path("/property_data/image_metadata")
 
 MODEL = "gpt-4.1-mini"
 

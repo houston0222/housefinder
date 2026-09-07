@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 
-PROPERTY_TEXT_DIR = Path("/app/data/embedding_text/properties")
-IMAGE_TEXT_DIR = Path("/app/data/embedding_text/images")
+PROPERTY_TEXT_DIR = Path("/property_data/embedding_text/properties")
+IMAGE_TEXT_DIR = Path("/property_data/embedding_text/images")
 
-PROPERTY_EMBEDDINGS_DIR = Path("/app/data/embeddings/properties")
-IMAGE_EMBEDDINGS_DIR = Path("/app/data/embeddings/images")
+PROPERTY_EMBEDDINGS_DIR = Path("/property_data/embeddings/properties")
+IMAGE_EMBEDDINGS_DIR = Path("/property_data/embeddings/images")
 
 MODEL = "text-embedding-3-small"
 

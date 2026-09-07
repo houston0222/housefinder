@@ -6,6 +6,6 @@ COPY pipeline/requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY pipeline ./pipeline
+COPY pipeline/ .
 
 CMD ["python", "-c", "print('HouseFinder pipeline container ready')"]

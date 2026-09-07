@@ -3,8 +3,8 @@ from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 
 
-RAW_IMAGES_DIR = Path("/app/data/raw_images")
-NORMALIZED_IMAGES_DIR = Path("/app/data/normalized_images")
+RAW_IMAGES_DIR = Path("/property_data/raw_images")
+NORMALIZED_IMAGES_DIR = Path("/property_data/normalized_images")
 
 MAX_SIZE = 1024
 JPEG_QUALITY = 80

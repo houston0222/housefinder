@@ -3,11 +3,11 @@ import json
 from typing import Any
 
 
-PARSED_DIR = Path("/app/data/parsed")
-IMAGE_METADATA_DIR = Path("/app/data/image_metadata")
+PARSED_DIR = Path("/property_data/parsed")
+IMAGE_METADATA_DIR = Path("/property_data/image_metadata")
 
-PROPERTY_TEXT_DIR = Path("/app/data/embedding_text/properties")
-IMAGE_TEXT_DIR = Path("/app/data/embedding_text/images")
+PROPERTY_TEXT_DIR = Path("/property_data/embedding_text/properties")
+IMAGE_TEXT_DIR = Path("/property_data/embedding_text/images")
 
 MIN_OVERALL_CONFIDENCE = 0.6
 MIN_VISUAL_OBSERVATION_CONFIDENCE = 0.75
