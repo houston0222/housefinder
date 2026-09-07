@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 
 RAW_IMAGES_DIR = Path("/app/data/raw_images")
@@ -72,10 +72,14 @@ def normalize_property_images(
                 / f"{image_path.stem}.jpg"
             )
 
-            was_normalized = normalize_image(
-                input_path=image_path,
-                output_path=output_path,
-            )
+            try:
+                was_normalized = normalize_image(
+                    input_path=image_path,
+                    output_path=output_path,
+                )
+            except (UnidentifiedImageError, OSError) as exc:
+                print(f"Failed to normalize {image_path}: {exc}")
+                continue
 
             if was_normalized:
                 normalized_count += 1
