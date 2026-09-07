@@ -8,9 +8,8 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
 
-from app.models.property import Base, Property
-from app.models.property_image import PropertyImage
-
+from backend.app.models.property import Base, Property
+from backend.app.models.property_image import PropertyImage
 
 DATA_DIR = Path("/property_data")
 

@@ -47,6 +47,7 @@ services:
     container_name: housefinder-pipeline
     volumes:
       - ./pipeline:/app
+      - ./backend:/app/backend
       - ./property_data:/property_data
     env_file:
       - .env
