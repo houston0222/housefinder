@@ -42,8 +42,8 @@ services:
       
   pipeline:
     build:
-      context: .
-      dockerfile: pipeline/Dockerfile
+      context: ./pipeline
+      dockerfile: Dockerfile
     container_name: housefinder-pipeline
     volumes:
       - ./pipeline:/app
